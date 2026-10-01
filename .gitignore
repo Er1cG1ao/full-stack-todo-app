@@ -1,0 +1,17 @@
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+frontend/node_modules/
+frontend/.angular/
+frontend/dist/
+frontend/coverage/
+
+backend/target/
+backend/data/
+backend/*.log
+
+.env
+.env.*
+!.env.example

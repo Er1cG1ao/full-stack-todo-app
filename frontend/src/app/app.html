@@ -1,0 +1,27 @@
+<!-- Navigation Menu -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a class="navbar-brand" routerLink="/">{{ title }}</a>
+  @if (isLoggedIn) {
+    <ul class="navbar-nav ms-auto">
+      <li class="nav-item" routerLinkActive="active">
+        <a class="nav-link" [routerLink]="['/welcome', username]">Home</a>
+      </li>
+      <li class="nav-item" routerLinkActive="active">
+        <a class="nav-link" routerLink="/todos">Todos</a>
+      </li>
+      <li class="nav-item" routerLinkActive="active">
+        <a class="nav-link" routerLink="/logout">Logout</a>
+      </li>
+    </ul>
+  }
+</nav>
+
+<!-- Router Outlet - displays matched component -->
+<div class="container mt-4">
+  <router-outlet></router-outlet>
+</div>
+
+<!-- Footer -->
+<footer class="footer mt-5 py-3 bg-dark text-white text-center">
+  <span>Todo App &copy; 2026 - Angular + Spring Boot</span>
+</footer>

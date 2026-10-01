@@ -1,0 +1,60 @@
+### lesson6 manual endpoint tests (IntelliJ HTTP Client / VS Code REST Client — just hit Run)
+@host = http://localhost:8080
+@user = Anyname
+
+### Connectivity check
+GET {{host}}/hello-world-bean
+
+### Path variable
+GET {{host}}/hello-world/path-variable/Zhongyan
+
+### List
+GET {{host}}/users/{{user}}/todos
+
+### Single item
+GET {{host}}/users/{{user}}/todos/1
+
+### Single item — nonexistent id, should be 404 and not 500
+GET {{host}}/users/{{user}}/todos/99999
+
+### Someone else's todo — should be 404; you must not see other people's data
+GET {{host}}/users/SomeoneElse/todos/1
+
+### Create — should be 201, with a Location header and the backend-assigned id in the body
+POST {{host}}/users/{{user}}/todos
+Content-Type: application/json
+
+{
+  "id": -1,
+  "description": "Learn REST properly",
+  "targetDate": "2026-12-31",
+  "done": false
+}
+
+### Create — description too short, should be 400 with a message in the body
+POST {{host}}/users/{{user}}/todos
+Content-Type: application/json
+
+{
+  "id": -1,
+  "description": "abc",
+  "targetDate": "2026-12-31",
+  "done": false
+}
+
+### Update — note that the id in the body is ignored; the path wins
+PUT {{host}}/users/{{user}}/todos/1
+Content-Type: application/json
+
+{
+  "id": 99,
+  "description": "Learn Angular Components - updated",
+  "targetDate": "2027-01-15",
+  "done": true
+}
+
+### Delete — should be 204 with no response body
+DELETE {{host}}/users/{{user}}/todos/1
+
+### Delete again — should be 404
+DELETE {{host}}/users/{{user}}/todos/1

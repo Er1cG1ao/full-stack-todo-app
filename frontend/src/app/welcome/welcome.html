@@ -1,0 +1,21 @@
+<div class="text-center mt-5">
+  <h1>Welcome, {{ name }}!</h1>
+  <p class="lead">Manage your todos efficiently.</p>
+
+  <a routerLink="/todos" class="btn btn-primary btn-lg mt-3">View My Todos</a>
+</div>
+
+<div class="text-center mt-4">
+  <p>点一下，去后端取一句定制欢迎语（GET /hello-world/path-variable/{{ name }}）</p>
+  <button class="btn btn-outline-secondary" (click)="getWelcomeMessage()">
+    Get Welcome Message
+  </button>
+</div>
+
+@if (messageFromService) {
+  <div class="alert alert-success mt-3">{{ messageFromService }}</div>
+}
+
+@if (errorFromService) {
+  <div class="alert alert-danger mt-3">{{ errorFromService }}</div>
+}
