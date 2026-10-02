@@ -1,0 +1,2 @@
+ALTER TABLE app_user ADD COLUMN recovery_hash VARCHAR(64);
+ALTER TABLE app_user ADD COLUMN row_version BIGINT NOT NULL DEFAULT 0;

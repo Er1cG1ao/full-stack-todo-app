@@ -1,89 +1,206 @@
 package com.example.todobackend.todo;
 
 import com.example.todobackend.user.AppUser;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
+import java.time.Instant;
 import java.time.LocalDate;
 
-/**
- *
- *   CREATE TABLE todo (
- *     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
- *     user_id     BIGINT NOT NULL,
- *     description VARCHAR(255) NOT NULL,
- *     target_date DATE,
- *     done        BOOLEAN NOT NULL DEFAULT FALSE,
- *     CONSTRAINT fk_todo_user FOREIGN KEY (user_id) REFERENCES app_user(id)
- *   );
- *   */
- @Entity
- @Table(name = "todo")
- public class TodoEntity {
+@Entity
+@Table(name = "todo", indexes = @Index(name = "idx_todo_user", columnList = "user_id"))
+public class TodoEntity {
+  @Column(name = "recurrence_generated", nullable = false)
+  private boolean recurrenceGenerated;
 
- @Id
- @GeneratedValue(strategy = GenerationType.IDENTITY)
- private Long id;
+  public boolean isRecurrenceGenerated() {
+    return recurrenceGenerated;
+  }
 
- @ManyToOne(fetch = FetchType.LAZY, optional = false)
- @JoinColumn(name = "user_id", nullable = false)
- private AppUser user;
+  public void markRecurrenceGenerated() {
+    recurrenceGenerated = true;
+  }
 
- @Column(nullable = false, length = 255)
- private String description;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
- @Column(name = "target_date", nullable = false)
- private LocalDate targetDate;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "user_id", nullable = false)
+  private AppUser user;
 
- @Column(nullable = false)
- private boolean done;
+  @Column(nullable = false, length = 255)
+  private String description;
 
- protected TodoEntity() {
- }
+  @Column(name = "target_date")
+  private LocalDate targetDate;
 
- public TodoEntity(AppUser user, String description, LocalDate targetDate, boolean done) {
- this.user = user;
- this.description = description;
- this.targetDate = targetDate;
- this.done = done;
- }
+  @Column(nullable = false)
+  private boolean done;
 
- public Long getId() {
- return id;
- }
+  @Column(length = 4000, nullable = false)
+  private String notes = "";
 
- public AppUser getUser() {
- return user;
- }
+  @Column(length = 10, nullable = false)
+  private String priority = "MEDIUM";
 
- public String getDescription() {
- return description;
- }
+  @Column(length = 80, nullable = false)
+  private String project = "";
 
- public void setDescription(String description) {
- this.description = description;
- }
+  @Column(length = 500, nullable = false)
+  private String tags = "";
 
- public LocalDate getTargetDate() {
- return targetDate;
- }
+  @Column(length = 10, nullable = false)
+  private String recurrence = "NONE";
 
- public void setTargetDate(LocalDate targetDate) {
- this.targetDate = targetDate;
- }
+  @Column(nullable = false)
+  private boolean starred;
 
- public boolean isDone() {
- return done;
- }
+  @Column(name = "subtasks_json", length = 16000, nullable = false)
+  private String subtasksJson = "[]";
 
- public void setDone(boolean done) {
- this.done = done;
- }
- }
+  @Column(name = "created_at", nullable = false)
+  private Instant createdAt = Instant.now();
+
+  @Column(name = "updated_at", nullable = false)
+  private Instant updatedAt = Instant.now();
+
+  @Column(name = "completed_at")
+  private Instant completedAt;
+
+  @Column(name = "deleted_at")
+  private Instant deletedAt;
+
+  @Version
+  @Column(nullable = false)
+  private Long version = 0L;
+
+  protected TodoEntity() {}
+
+  public TodoEntity(AppUser user, String description, LocalDate targetDate, boolean done) {
+    this.user = user;
+    this.description = description;
+    this.targetDate = targetDate;
+    this.done = done;
+    if (done) completedAt = Instant.now();
+  }
+
+  @PreUpdate
+  void onUpdate() {
+    updatedAt = Instant.now();
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public AppUser getUser() {
+    return user;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String v) {
+    description = v;
+  }
+
+  public LocalDate getTargetDate() {
+    return targetDate;
+  }
+
+  public void setTargetDate(LocalDate v) {
+    targetDate = v;
+  }
+
+  public boolean isDone() {
+    return done;
+  }
+
+  public void setDone(boolean v) {
+    done = v;
+  }
+
+  public String getNotes() {
+    return notes;
+  }
+
+  public void setNotes(String v) {
+    notes = v;
+  }
+
+  public String getPriority() {
+    return priority;
+  }
+
+  public void setPriority(String v) {
+    priority = v;
+  }
+
+  public String getProject() {
+    return project;
+  }
+
+  public void setProject(String v) {
+    project = v;
+  }
+
+  public String getTags() {
+    return tags;
+  }
+
+  public void setTags(String v) {
+    tags = v;
+  }
+
+  public String getRecurrence() {
+    return recurrence;
+  }
+
+  public void setRecurrence(String v) {
+    recurrence = v;
+  }
+
+  public boolean isStarred() {
+    return starred;
+  }
+
+  public void setStarred(boolean v) {
+    starred = v;
+  }
+
+  public String getSubtasksJson() {
+    return subtasksJson;
+  }
+
+  public void setSubtasksJson(String v) {
+    subtasksJson = v;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public Instant getCompletedAt() {
+    return completedAt;
+  }
+
+  public void setCompletedAt(Instant v) {
+    completedAt = v;
+  }
+
+  public Instant getDeletedAt() {
+    return deletedAt;
+  }
+
+  public void setDeletedAt(Instant v) {
+    deletedAt = v;
+  }
+
+  public Long getVersion() {
+    return version;
+  }
+}

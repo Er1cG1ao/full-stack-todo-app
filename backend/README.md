@@ -1,31 +1,20 @@
-# Todo App Backend
+# Daylight API
 
-Spring Boot REST API for the Todo application. Todos are stored in a file-based H2 database
-and belong to a seeded application user.
+Java 17+ / Spring Boot 4 / Spring Security / Spring Data JPA / Flyway / H2.
+Use Java 21 for the same runtime as CI.
 
-## Requirements
+    ./mvnw spring-boot:run
+    ./mvnw --batch-mode --no-transfer-progress verify
 
-- Java 17+
-- No separate Maven installation is required
+The API listens on 8080. Data is under data/; no accounts are seeded.
+The H2 web console is disabled. Register through the UI or POST /auth/register.
 
-## Run
+See the [root README](../README.md), [security model](../docs/SECURITY.md) and
+[OpenAPI contract](src/main/resources/static/openapi.yaml). Swagger UI is bundled
+locally at /swagger-ui.html, with no external CDN.
 
-```bash
-./mvnw spring-boot:run
-```
+The older /users/{username}/todos API is retained for compatibility but is not used
+by the new UI. Ownership is enforced there too. Its DELETE now moves tasks to Trash.
+New integrations should use /api/tasks, including version-checked updates.
 
-The API starts at `http://localhost:8080`. The H2 console is available at
-`http://localhost:8080/h2-console`; use JDBC URL `jdbc:h2:file:./data/todo-db` and username
-`sa` with a blank password.
-
-The database seeds `alice`, `bob`, and `carol` on first launch. The Angular demo login uses
-`alice`.
-
-## Verify
-
-```bash
-./mvnw test
-```
-
-The integration test covers the complete create, read, update, and delete lifecycle against an
-isolated in-memory H2 database.
+EXERCISE_GUIDE_ZH.md is retained as historical learning material, not the current API contract.

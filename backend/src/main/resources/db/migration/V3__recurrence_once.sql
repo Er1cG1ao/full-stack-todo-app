@@ -1,0 +1,1 @@
+ALTER TABLE todo ADD COLUMN recurrence_generated BOOLEAN NOT NULL DEFAULT FALSE;

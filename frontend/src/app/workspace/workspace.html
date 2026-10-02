@@ -1,0 +1,814 @@
+<div class="workspace">
+  @if (sidebar()) {
+    <button
+      class="sidebar-scrim"
+      aria-label="Close navigation"
+      (click)="sidebar.set(false)"
+    ></button>
+  }
+  <aside class="sidebar" [class.mobile-open]="sidebar()" aria-label="Main navigation">
+    <a class="brand" href="/app"
+      ><span class="brand-mark"><app-icon name="sun" /></span>daylight<span class="brand-dot"
+        >.</span
+      ></a
+    >
+    <div class="workspace-label"><span class="workspace-dot"></span>Personal workspace</div>
+    <button class="sidebar-add" (click)="edit()" [disabled]="busy()">
+      <app-icon name="plus" />New task<span class="keycap">N</span>
+    </button>
+    <div class="nav-section-label">WORKSPACE</div>
+    <nav>
+      @for (item of nav; track item.id) {
+        <button class="nav-item" [class.active]="view() === item.id" (click)="navigate(item.id)">
+          <app-icon [name]="item.icon" /><span>{{ item.name }}</span
+          ><span class="nav-count">{{ count(item.id) }}</span>
+        </button>
+      }
+    </nav>
+    <div class="nav-section-label projects-label">
+      <span>PROJECTS</span
+      ><button class="small-icon" aria-label="Add project" (click)="openProject()">
+        <app-icon name="plus" />
+      </button>
+    </div>
+    <div class="project-nav">
+      @for (project of projects(); track project.id) {
+        <div class="project-link">
+          <button
+            class="nav-item"
+            [class.active]="view() === 'project:' + project.name"
+            (click)="navigate('project:' + project.name)"
+          >
+            <span class="project-dot" [style.background]="project.color"></span
+            ><span class="project-name">{{ project.name }}</span
+            ><span class="nav-count">{{ count('project:' + project.name) }}</span>
+          </button>
+          <button
+            class="project-menu small-icon"
+            [attr.aria-label]="'Edit project ' + project.name"
+            (click)="openProject(project)"
+          >
+            <app-icon name="more" />
+          </button>
+        </div>
+      } @empty {
+        <button class="empty-projects" (click)="openProject()">+ Create your first project</button>
+      }
+    </div>
+    <div class="sidebar-bottom">
+      <button
+        class="nav-item"
+        [class.active]="view() === 'completed'"
+        (click)="navigate('completed')"
+      >
+        <app-icon name="check" /><span>Completed</span>
+      </button>
+      <button class="nav-item" [class.active]="view() === 'trash'" (click)="navigate('trash')">
+        <app-icon name="trash" /><span>Trash</span>
+      </button>
+      <div class="user-section">
+        <button class="user-button" (click)="openSettings()" aria-label="Account settings">
+          <span class="avatar">{{ auth.username?.slice(0, 1)?.toUpperCase() }}</span
+          ><span
+            ><strong>{{ auth.username }}</strong
+            ><small>Your personal space</small></span
+          ><app-icon name="settings" />
+        </button>
+      </div>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="breadcrumb">
+        <button
+          class="icon-button mobile-toggle"
+          (click)="sidebar.set(true)"
+          aria-label="Open navigation"
+        >
+          <app-icon name="menu" /></button
+        ><span>My workspace</span><app-icon name="arrow" /><strong>{{
+          view().startsWith('project:') ? view().slice(8) : view() === 'all' ? 'Overview' : title()
+        }}</strong>
+      </div>
+      <div class="topbar-right">
+        <span class="today-date">{{ today() | date: 'EEE, MMM d' }}</span
+        ><button
+          class="icon-button"
+          (click)="theme.toggle()"
+          [attr.aria-label]="theme.dark() ? 'Switch to light theme' : 'Switch to dark theme'"
+        >
+          <app-icon [name]="theme.dark() ? 'sun' : 'moon'" /></button
+        ><button class="icon-button" (click)="openSettings()" aria-label="Open settings">
+          <app-icon name="settings" />
+        </button>
+      </div>
+    </header>
+    <div class="main-content">
+      <section class="page-heading">
+        <div>
+          <p class="eyebrow">{{ view() === 'all' ? 'A FRESH PERSPECTIVE' : 'YOUR WORKSPACE' }}</p>
+          <h1>{{ title() }}</h1>
+          <p class="subtitle">{{ subtitle() }}</p>
+        </div>
+        @if (view() !== 'trash' && view() !== 'completed') {
+          <button class="primary-button heading-add" (click)="edit()" [disabled]="busy()">
+            <app-icon name="plus" />Add task
+          </button>
+        }
+      </section>
+      @if (view() === 'all') {
+        <section class="overview" aria-label="Task overview">
+          <div class="stat">
+            <span class="stat-icon sage"><app-icon name="list" /></span>
+            <div>
+              <strong>{{ active().length }}</strong
+              ><span>Tasks in progress</span>
+            </div>
+          </div>
+          <div class="stat">
+            <span class="stat-icon peach"><app-icon name="sun" /></span>
+            <div>
+              <strong>{{ dueToday() }}</strong
+              ><span>Due today</span>
+            </div>
+          </div>
+          <div class="stat">
+            <span class="stat-icon lavender"><app-icon name="check" /></span>
+            <div>
+              <strong>{{ completedToday() }}</strong
+              ><span>Completed today</span>
+            </div>
+          </div>
+          <div class="progress-stat">
+            <div>
+              <span>Today’s momentum</span><strong>{{ progress() }}%</strong>
+            </div>
+            <div class="progress-track"><div [style.width.%]="progress()"></div></div>
+            <small>{{
+              overdue()
+                ? overdue() + ' overdue · You can always start again.'
+                : 'Small steps. Meaningful progress.'
+            }}</small>
+          </div>
+        </section>
+      }
+      @if (error()) {
+        <div class="error-banner" role="alert">
+          <span>{{ error() }}</span
+          ><button (click)="load()">Try again</button
+          ><button class="small-icon" (click)="error.set('')" aria-label="Dismiss error">
+            <app-icon name="close" />
+          </button>
+        </div>
+      }
+      <section class="tasks-panel">
+        <div class="panel-top">
+          <div class="panel-title">
+            <h2>{{ view() === 'all' ? 'Your tasks' : 'Tasks' }}</h2>
+            <span class="count-pill">{{ filtered().length }}</span>
+          </div>
+          <div class="view-switch" aria-label="View layout">
+            <button
+              [class.active]="layout() === 'list'"
+              (click)="setLayout('list')"
+              aria-label="List view"
+            >
+              <app-icon name="list" /></button
+            ><button
+              [class.active]="layout() === 'board'"
+              (click)="setLayout('board')"
+              aria-label="Board view"
+            >
+              <app-icon name="board" />
+            </button>
+          </div>
+        </div>
+        <div class="toolbar">
+          <label class="search"
+            ><app-icon name="search" /><input
+              #searchInput
+              aria-label="Search tasks"
+              placeholder="Search tasks, notes, tags…"
+              [ngModel]="query()"
+              (ngModelChange)="query.set($event)"
+            /><span class="keycap">/</span></label
+          >
+          <div class="filters">
+            <select
+              aria-label="Filter by priority"
+              [ngModel]="priority()"
+              (ngModelChange)="priority.set($event)"
+            >
+              <option value="">All priorities</option>
+              <option value="HIGH">High priority</option>
+              <option value="MEDIUM">Medium priority</option>
+              <option value="LOW">Low priority</option>
+            </select>
+            @if (view() !== 'completed' && view() !== 'trash') {
+              <select
+                aria-label="Filter by status"
+                [ngModel]="status()"
+                (ngModelChange)="status.set($event)"
+              >
+                <option value="active">Active</option>
+                <option value="done">Completed</option>
+                <option value="all">All statuses</option>
+              </select>
+            }
+            @if (tags().length) {
+              <select
+                aria-label="Filter by tag"
+                [ngModel]="tag()"
+                (ngModelChange)="tag.set($event)"
+              >
+                <option value="">All tags</option>
+                @for (t of tags(); track t) {
+                  <option [value]="t">{{ t }}</option>
+                }
+              </select>
+            }
+            <select aria-label="Sort tasks" [ngModel]="sort()" (ngModelChange)="sort.set($event)">
+              <option value="due">Due date</option>
+              <option value="priority">Priority</option>
+              <option value="newest">Newest first</option>
+              <option value="title">Alphabetical</option>
+            </select>
+          </div>
+        </div>
+        @if (selected().size) {
+          <div class="bulk-bar">
+            <span>{{ selected().size }} selected</span
+            ><button (click)="selectAll()">Select all</button>
+            @if (view() === 'trash') {
+              <button (click)="bulk('restore')" [disabled]="busy()">Restore</button>
+            } @else {
+              <button (click)="bulk('complete')" [disabled]="busy()">Complete</button
+              ><button (click)="bulk('reopen')" [disabled]="busy()">Reopen</button
+              ><button (click)="bulk('trash')" [disabled]="busy()">Move to Trash</button>
+            }
+            <button
+              class="small-icon"
+              (click)="selected.set(newSet())"
+              aria-label="Clear selection"
+            >
+              <app-icon name="close" />
+            </button>
+          </div>
+        }
+        @if (loading()) {
+          <div class="loading-state" role="status">
+            <span class="spinner"></span>Bringing your tasks into focus…
+          </div>
+        } @else if (filtered().length === 0) {
+          <div class="empty-state">
+            <div class="empty-illustration">
+              <span class="empty-orbit"></span
+              ><app-icon
+                [name]="view() === 'completed' ? 'check' : view() === 'trash' ? 'trash' : 'sun'"
+              />
+            </div>
+            <h3>
+              {{
+                query() || priority() || tag()
+                  ? 'No matching tasks'
+                  : view() === 'completed'
+                    ? 'Your wins will live here'
+                    : view() === 'trash'
+                      ? 'Nothing in the trash'
+                      : 'A little breathing room.'
+              }}
+            </h3>
+            <p>
+              {{
+                query() || priority() || tag()
+                  ? 'Try a different search or clear your filters.'
+                  : view() === 'completed'
+                    ? 'Complete your first task to start building momentum.'
+                    : view() === 'trash'
+                      ? 'Deleted tasks appear here. You can restore them anytime.'
+                      : 'Add something you’d like to do. Big or small, it all counts.'
+              }}
+            </p>
+            @if (view() !== 'completed' && view() !== 'trash') {
+              <button class="text-button" (click)="edit()">
+                <app-icon name="plus" />Create a task
+              </button>
+            }
+          </div>
+        } @else if (layout() === 'board') {
+          <div class="board">
+            @for (column of boardColumns; track column.priority) {
+              <section class="board-column">
+                <h3>
+                  <span class="priority-dot" [class]="column.priority.toLowerCase()"></span
+                  >{{ column.label }}<span>{{ boardTasks(column.priority).length }}</span>
+                </h3>
+                @for (task of boardTasks(column.priority); track task.id) {
+                  <div class="board-card">
+                    <ng-container *ngTemplateOutlet="taskRow; context: { $implicit: task }" />
+                  </div>
+                } @empty {
+                  <p class="board-empty">Nothing here yet</p>
+                }
+              </section>
+            }
+          </div>
+        } @else {
+          <div class="task-groups">
+            @for (group of groups(); track group.name) {
+              <section class="task-group">
+                <h3 [class.overdue-heading]="group.name === 'Overdue'">
+                  {{ group.name }}<span>{{ group.tasks.length }}</span>
+                </h3>
+                @for (task of group.tasks; track task.id) {
+                  <ng-container *ngTemplateOutlet="taskRow; context: { $implicit: task }" />
+                }
+              </section>
+            }
+          </div>
+        }
+        @if (view() !== 'completed' && view() !== 'trash') {
+          <form class="quick-add" (ngSubmit)="addQuick()">
+            <app-icon name="plus" /><input
+              #quickInput
+              aria-label="Quick add a task"
+              name="quickTitle"
+              [(ngModel)]="quickTitle"
+              maxlength="255"
+              placeholder="Add a task…"
+            /><button type="submit" [disabled]="!quickTitle.trim() || busy()">
+              Add task<span class="keycap">↵</span>
+            </button>
+          </form>
+        }
+      </section>
+      <footer class="workspace-footer">
+        <span><span class="tiny-sun">✳</span>A little more focus. A little more daylight.</span
+        ><span class="shortcuts">N · new task &nbsp; / · search</span>
+      </footer>
+    </div>
+  </main>
+</div>
+
+<ng-template #taskRow let-task>
+  <div class="task-row" [class.is-complete]="task.done" [class.selected]="selected().has(task.id)">
+    <input
+      type="checkbox"
+      class="selection-box"
+      [attr.aria-label]="'Select ' + task.description"
+      [checked]="selected().has(task.id)"
+      (change)="toggleSelection(task.id)"
+    />
+    @if (!task.deletedAt) {
+      <button
+        class="task-checkbox"
+        [class.checked]="task.done"
+        [disabled]="busy()"
+        [attr.aria-label]="(task.done ? 'Reopen ' : 'Complete ') + task.description"
+        (click)="toggleDone(task)"
+      >
+        @if (task.done) {
+          <app-icon name="check" />
+        }
+      </button>
+    }
+    <button class="task-main" (click)="!task.deletedAt && edit(task)" [disabled]="!!task.deletedAt">
+      <span class="task-title">{{ task.description }}</span
+      ><span class="task-meta">
+        @if (task.project) {
+          <span class="meta-project"
+            ><span class="project-dot" [style.background]="projectColorFor(task.project)"></span
+            >{{ task.project }}</span
+          >
+        }
+        @for (t of tagList(task); track t) {
+          <span class="tag-label">#{{ t }}</span>
+        }
+        @if (task.subtasks.length) {
+          <span class="subtask-count"
+            ><app-icon name="list" />{{ completedSubtasks(task) }}/{{ task.subtasks.length }}</span
+          >
+        }
+        @if (task.recurrence !== 'NONE') {
+          <span class="repeat-label"
+            ><app-icon name="repeat" />{{ task.recurrence.toLowerCase() }}</span
+          >
+        }
+        @if (task.notes) {
+          <span class="notes-indicator">Notes</span>
+        }
+      </span>
+    </button>
+    <div class="task-trailing">
+      <span class="priority-pill" [class]="task.priority.toLowerCase()"
+        ><span></span>{{ task.priority.toLowerCase() }}</span
+      >
+      @if (task.targetDate) {
+        <span
+          class="due-label"
+          [class.overdue]="!task.done && task.targetDate < today()"
+          [class.today]="task.targetDate === today()"
+          ><app-icon name="calendar" />{{ dueLabel(task.targetDate) }}</span
+        >
+      }
+      @if (task.deletedAt) {
+        <button
+          class="icon-button"
+          (click)="restore(task)"
+          aria-label="Restore task"
+          [disabled]="busy()"
+        >
+          <app-icon name="undo" /></button
+        ><button
+          class="icon-button danger"
+          (click)="purge(task)"
+          aria-label="Permanently delete task"
+          [disabled]="busy()"
+        >
+          <app-icon name="trash" />
+        </button>
+      } @else {
+        <button
+          class="icon-button star-button"
+          [class.starred]="task.starred"
+          [attr.aria-label]="task.starred ? 'Remove from Important' : 'Mark as important'"
+          (click)="star(task)"
+          [disabled]="busy()"
+        >
+          <app-icon name="star" /></button
+        ><button
+          class="icon-button task-delete"
+          aria-label="Move task to Trash"
+          (click)="trash(task)"
+          [disabled]="busy()"
+        >
+          <app-icon name="trash" />
+        </button>
+      }
+    </div>
+  </div>
+</ng-template>
+
+<dialog
+  #taskDialog
+  class="task-dialog"
+  (cancel)="busy() && $event.preventDefault()"
+  aria-label="Task editor"
+>
+  @if (draft(); as task) {
+    <form #taskForm="ngForm" (ngSubmit)="saveTask()">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">MAKE IT HAPPEN</p>
+          <h2>{{ task.id ? 'Task details' : 'A new possibility.' }}</h2>
+        </div>
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Close task editor"
+          (click)="taskDialog.close()"
+          [disabled]="busy()"
+        >
+          <app-icon name="close" />
+        </button>
+      </div>
+      @if (modalError()) {
+        <div class="modal-error" role="alert">{{ modalError() }}</div>
+      }
+      <label class="field"
+        ><span>Task title</span
+        ><input
+          name="description"
+          [(ngModel)]="task.description"
+          required
+          maxlength="255"
+          placeholder="What would you like to do?"
+          autofocus
+      /></label>
+      <label class="field"
+        ><span>Notes <small>Optional</small></span
+        ><textarea
+          name="notes"
+          [(ngModel)]="task.notes"
+          maxlength="4000"
+          rows="3"
+          placeholder="A little context, a link, a thought…"
+        ></textarea>
+      </label>
+      <div class="field-grid">
+        <label class="field"
+          ><span>Due date</span
+          ><input type="date" name="targetDate" [(ngModel)]="task.targetDate" /></label
+        ><label class="field"
+          ><span>Priority</span
+          ><select name="priority" [(ngModel)]="task.priority">
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+          </select></label
+        ><label class="field"
+          ><span>Project</span
+          ><select name="project" [(ngModel)]="task.project">
+            <option value="">Inbox</option>
+            @for (project of projects(); track project.id) {
+              <option [value]="project.name">{{ project.name }}</option>
+            }
+          </select></label
+        ><label class="field"
+          ><span>Repeat</span
+          ><select name="recurrence" [(ngModel)]="task.recurrence">
+            <option value="NONE">Does not repeat</option>
+            <option value="DAILY">Every day</option>
+            <option value="WEEKLY">Every week</option>
+            <option value="MONTHLY">Every month</option>
+          </select></label
+        >
+      </div>
+      <label class="field"
+        ><span>Tags <small>Separated by commas</small></span
+        ><input
+          name="tags"
+          [(ngModel)]="task.tags"
+          maxlength="500"
+          placeholder="work, personal, creative"
+      /></label>
+      <div class="subtasks-editor">
+        <div class="field-label">
+          Subtasks <small>{{ completedSubtasks(task) }}/{{ task.subtasks.length }}</small>
+        </div>
+        @for (subtask of task.subtasks; track subtask.id) {
+          <div class="subtask-edit-row">
+            <input
+              type="checkbox"
+              [name]="'done-' + subtask.id"
+              [(ngModel)]="subtask.done"
+              [attr.aria-label]="'Complete subtask ' + subtask.title"
+            /><input
+              [name]="'title-' + subtask.id"
+              [(ngModel)]="subtask.title"
+              required
+              maxlength="200"
+              aria-label="Subtask title"
+            /><button
+              class="small-icon"
+              type="button"
+              (click)="removeSubtask(subtask.id)"
+              aria-label="Remove subtask"
+            >
+              <app-icon name="close" />
+            </button>
+          </div>
+        }
+        <div class="subtask-add">
+          <app-icon name="plus" /><input
+            name="subtaskTitle"
+            [(ngModel)]="subtaskTitle"
+            maxlength="200"
+            placeholder="Break it into a smaller step…"
+            aria-label="New subtask"
+            (keydown.enter)="$event.preventDefault(); addSubtask()"
+          /><button
+            type="button"
+            (click)="addSubtask()"
+            [disabled]="!subtaskTitle.trim() || task.subtasks.length >= 50"
+          >
+            Add
+          </button>
+        </div>
+      </div>
+      <div class="task-options">
+        <label><input type="checkbox" name="done" [(ngModel)]="task.done" />Completed</label
+        ><label><input type="checkbox" name="starred" [(ngModel)]="task.starred" />Important</label>
+        @if (task.id) {
+          <button
+            class="text-button"
+            type="button"
+            (click)="duplicate(task); taskDialog.close()"
+            [disabled]="busy()"
+          >
+            Duplicate
+          </button>
+        }
+      </div>
+      <div class="dialog-footer">
+        <button
+          class="secondary-button"
+          type="button"
+          (click)="taskDialog.close()"
+          [disabled]="busy()"
+        >
+          Cancel</button
+        ><button
+          class="primary-button"
+          type="submit"
+          [disabled]="busy() || taskForm.invalid || !task.description.trim()"
+        >
+          {{ busy() ? 'Saving…' : task.id ? 'Save changes' : 'Create task' }}
+        </button>
+      </div>
+    </form>
+  }
+</dialog>
+
+<dialog #projectDialog class="project-dialog">
+  <form (ngSubmit)="saveProject()">
+    <div class="dialog-header">
+      <h2>{{ editingProject ? 'Edit project' : 'A place for your plans.' }}</h2>
+      <button
+        class="icon-button"
+        type="button"
+        (click)="projectDialog.close()"
+        aria-label="Close project editor"
+      >
+        <app-icon name="close" />
+      </button>
+    </div>
+    @if (modalError()) {
+      <div class="modal-error" role="alert">{{ modalError() }}</div>
+    }
+    <label class="field"
+      ><span>Project name</span
+      ><input
+        name="projectName"
+        [(ngModel)]="projectName"
+        maxlength="80"
+        required
+        placeholder="e.g. Work, Life, Side project"
+        autofocus
+    /></label>
+    <div class="field-label">Choose a color</div>
+    <div class="color-picker">
+      @for (color of colors; track color) {
+        <button
+          type="button"
+          [style.background]="color"
+          [class.selected]="projectColor === color"
+          [attr.aria-label]="'Choose color ' + color"
+          (click)="projectColor = color"
+        >
+          @if (projectColor === color) {
+            <app-icon name="check" />
+          }
+        </button>
+      }
+    </div>
+    <div class="dialog-footer">
+      @if (editingProject) {
+        <button
+          type="button"
+          class="text-button danger"
+          (click)="deleteProject()"
+          [disabled]="busy()"
+        >
+          Remove project
+        </button>
+      }
+      <button class="primary-button" type="submit" [disabled]="busy() || !projectName.trim()">
+        Save project
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<dialog #settingsDialog class="settings-dialog">
+  <div class="dialog-header">
+    <div>
+      <p class="eyebrow">YOUR PERSONAL SPACE</p>
+      <h2>Settings</h2>
+    </div>
+    <button class="icon-button" (click)="settingsDialog.close()" aria-label="Close settings">
+      <app-icon name="close" />
+    </button>
+  </div>
+  @if (modalError()) {
+    <div class="modal-error" role="alert">{{ modalError() }}</div>
+  }
+  <section class="settings-section">
+    <h3>Appearance</h3>
+    <div class="setting-row">
+      <div>
+        <strong>{{ theme.dark() ? 'Dark theme' : 'Light theme' }}</strong>
+        <p>A workspace that feels like you.</p>
+      </div>
+      <button class="secondary-button" (click)="theme.toggle()">
+        <app-icon [name]="theme.dark() ? 'sun' : 'moon'" />Switch theme
+      </button>
+    </div>
+  </section>
+  <section class="settings-section">
+    <h3>Your data</h3>
+    <p>Keep a copy of your tasks and projects, or bring a backup into your workspace.</p>
+    <div class="settings-actions">
+      <button class="secondary-button" (click)="exportBackup()">
+        <app-icon name="download" />Export backup</button
+      ><label class="secondary-button import-button"
+        ><app-icon name="upload" />Import backup<input
+          type="file"
+          accept=".json,application/json"
+          (change)="importBackup($event)"
+          aria-label="Import backup file"
+      /></label>
+    </div>
+  </section>
+  <section class="settings-section">
+    <h3>Change password</h3>
+    <p>Changing your password signs you out on all devices.</p>
+    <form #passwordForm="ngForm" (ngSubmit)="changePassword()">
+      <label class="field"
+        ><span>Current password</span
+        ><input
+          type="password"
+          name="currentPassword"
+          [(ngModel)]="currentPassword"
+          autocomplete="current-password"
+          required
+      /></label>
+      <div class="field-grid">
+        <label class="field"
+          ><span>New password</span
+          ><input
+            type="password"
+            name="newPassword"
+            [(ngModel)]="newPassword"
+            autocomplete="new-password"
+            minlength="8"
+            required /></label
+        ><label class="field"
+          ><span>Confirm new password</span
+          ><input
+            type="password"
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
+            autocomplete="new-password"
+            minlength="8"
+            required
+        /></label>
+      </div>
+      <button class="secondary-button" type="submit" [disabled]="busy() || passwordForm.invalid">
+        <app-icon name="lock" />Update password
+      </button>
+    </form>
+  </section>
+  <section class="settings-section">
+    <h3>Account recovery</h3>
+    <p>
+      A one-time recovery key lets you reset a forgotten password without email. Generating a new
+      key replaces your previous key. Store it privately; anyone with it can reset your password.
+    </p>
+    @if (recoveryCode()) {
+      <code class="recovery-code">{{ recoveryCode() }}</code>
+      <p>Save it now. It will not be shown again after you close Settings.</p>
+    } @else {
+      <form (ngSubmit)="generateRecoveryKey()">
+        <label class="field"
+          ><span>Confirm current password</span
+          ><input
+            type="password"
+            name="recoveryPassword"
+            [(ngModel)]="recoveryPassword"
+            autocomplete="current-password"
+            required
+        /></label>
+        <button class="secondary-button" type="submit" [disabled]="busy() || !recoveryPassword">
+          <app-icon name="lock" />Generate recovery key
+        </button>
+      </form>
+    }
+  </section>
+  <section class="settings-section account-info">
+    <span
+      >Signed in as <strong>{{ auth.username }}</strong></span
+    ><button
+      class="text-button danger"
+      (click)="settingsDialog.close(); logout()"
+      [disabled]="busy()"
+    >
+      <app-icon name="logout" />Sign out
+    </button>
+  </section>
+</dialog>
+
+<dialog #confirmDialog class="confirm-dialog">
+  <div class="dialog-header">
+    <h2>{{ confirming().title }}</h2>
+    <button class="icon-button" (click)="confirmDialog.close()" aria-label="Close confirmation">
+      <app-icon name="close" />
+    </button>
+  </div>
+  <p>{{ confirming().message }}</p>
+  <div class="dialog-footer">
+    <button class="secondary-button" (click)="confirmDialog.close()">Cancel</button
+    ><button class="primary-button" (click)="confirmAction()">{{ confirming().label }}</button>
+  </div>
+</dialog>
+@if (toast()) {
+  <div class="toast" role="status">
+    <span class="toast-check"><app-icon name="check" /></span>{{ toast() }}
+    @if (undoAction) {
+      <button (click)="undo()">Undo</button>
+    }
+    <button class="small-icon" (click)="toast.set('')" aria-label="Dismiss notification">
+      <app-icon name="close" />
+    </button>
+  </div>
+}

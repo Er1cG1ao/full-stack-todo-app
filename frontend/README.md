@@ -1,28 +1,15 @@
-# Todo App Frontend
+# Daylight frontend
 
-Angular frontend for the full-stack Todo application.
+Angular standalone components, signals, strict TypeScript/templates and native dialogs.
+Styling uses local CSS and SVG icons; no remote fonts, trackers or image services.
 
-## Requirements
+Use Node.js 24.19.0 and npm 11.16.0:
 
-- Node.js 22.22.3+, 24.15.0+, or 26+
-- npm 11+
-- The companion backend running at `http://localhost:8080`
+    npm ci
+    npm start
+    npm run check
 
-## Run
-
-```bash
-npm ci
-npm start
-```
-
-Open `http://localhost:4200` and use the demo credentials `alice` / `dummy`.
-
-## Verify
-
-```bash
-npm test -- --watch=false
-npm run build
-```
-
-The application uses client-side rendering because its login state is stored in browser
-session storage.
+The backend must be running on 8080. See proxy.conf.json for development routing,
+nginx.conf for container routing, and the [root README](../README.md) for the full setup.
+npm run check checks formatting, unit/component tests and the production build.
+The workspace is lazy-loaded after authentication.
