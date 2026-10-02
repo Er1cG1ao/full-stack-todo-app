@@ -88,6 +88,8 @@ scripts/backup.sh operates on the native data directory, not on Docker volumes.
   task advances from today, avoiding a backlog; reopening/recompleting the same
   occurrence does not generate another copy. New occurrences reset subtasks.
 - Dates are calendar dates. There are no time-of-day reminders or external notifications.
+- Recurrence uses the browser's IANA time zone sent as X-Time-Zone. API clients may
+  send the same optional header; without it the server's calendar date is used.
 - Online-only writes; connection failures are surfaced, not silently stored offline.
 - Task lists load in memory. This is not designed for millions of tasks per account.
 - No automatic email recovery. Save your recovery key and generate another after use.

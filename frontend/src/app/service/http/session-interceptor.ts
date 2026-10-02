@@ -10,7 +10,12 @@ export const sessionInterceptor: HttpInterceptorFn = (request, next) => {
   const http = inject(HttpClient);
   const auth = inject(AuthService);
   const router = inject(Router);
-  const authenticated = request.clone({ withCredentials: true });
+  const authenticated = request.clone({
+    withCredentials: true,
+    setHeaders: request.url.startsWith('/api/')
+      ? { 'X-Time-Zone': Intl.DateTimeFormat().resolvedOptions().timeZone }
+      : {},
+  });
   const safe = ['GET', 'HEAD', 'OPTIONS'].includes(request.method);
   const result = safe
     ? next(authenticated)

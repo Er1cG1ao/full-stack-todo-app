@@ -103,11 +103,24 @@ describe('Server authentication', () => {
     expect(auth.isUserLoggedIn()).toBe(false);
   });
 
+  it('sends fresh CSRF, cookies and the browser calendar zone on task writes', () => {
+    TestBed.inject(HttpClient).post('/api/tasks', { description: 'Calendar task' }).subscribe();
+    csrf('calendar-token');
+    const request = http.expectOne('/api/tasks');
+    expect(request.request.withCredentials).toBe(true);
+    expect(request.request.headers.get('X-CSRF-TOKEN')).toBe('calendar-token');
+    expect(request.request.headers.get('X-Time-Zone')).toBe(
+      Intl.DateTimeFormat().resolvedOptions().timeZone,
+    );
+    request.flush({});
+  });
+
   it('never attaches credentials or CSRF tokens to another server', () => {
     TestBed.inject(HttpClient).post('https://other.example/action', {}).subscribe();
     const external = http.expectOne('https://other.example/action');
     expect(external.request.withCredentials).toBe(false);
     expect(external.request.headers.has('X-CSRF-TOKEN')).toBe(false);
+    expect(external.request.headers.has('X-Time-Zone')).toBe(false);
     http.expectNone(`${API_URL}/auth/csrf`);
     external.flush({});
   });

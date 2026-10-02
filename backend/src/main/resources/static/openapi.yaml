@@ -1239,7 +1239,12 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClientTimeZone"
+          }
+        ]
       },
       "delete": {
         "summary": "Move owned task to Trash; not permanent deletion",
@@ -1647,7 +1652,12 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClientTimeZone"
+          }
+        ]
       }
     },
     "/api/projects": {
@@ -2392,7 +2402,8 @@
           "project": {
             "type": "string",
             "maxLength": 80,
-            "default": ""
+            "default": "",
+            "description": "Existing project name in the signed-in account, or empty string for Inbox"
           },
           "tags": {
             "type": "string",
@@ -2571,6 +2582,18 @@
           "retryAfter": {
             "type": "integer"
           }
+        }
+      }
+    },
+    "parameters": {
+      "ClientTimeZone": {
+        "name": "X-Time-Zone",
+        "in": "header",
+        "required": false,
+        "description": "IANA browser time zone for recurrence date calculations. Missing header uses the server calendar.",
+        "schema": {
+          "type": "string",
+          "example": "America/New_York"
         }
       }
     }

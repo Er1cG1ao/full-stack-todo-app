@@ -29,6 +29,7 @@ class AuthIntegrationTest {
   @Autowired PasswordEncoder passwords;
   private final ObjectMapper json = new ObjectMapper();
   private static final String PASSWORD = "correct-horse-42";
+  private String timeZone = java.time.ZoneId.systemDefault().getId();
 
   private HttpClient browser() {
     return HttpClient.newBuilder()
@@ -40,6 +41,7 @@ class AuthIntegrationTest {
       HttpClient client, String method, String path, String body, String contentType, boolean csrf)
       throws Exception {
     var builder = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path));
+    builder.header("X-Time-Zone", timeZone);
     if (csrf) {
       var token = json.readTree(request(client, "GET", "/auth/csrf", "", "", false).body());
       builder.header(token.get("headerName").asString(), token.get("token").asString());
@@ -246,6 +248,9 @@ class AuthIntegrationTest {
   @Test
   void richTaskLifecycleRequiresVersionsAndPreservesMetadata() throws Exception {
     var client = account();
+    var invalid = task("Invalid project");
+    invalid.setProject("Nonexistent project");
+    assertThat(api(client, "POST", "/api/tasks", invalid).statusCode()).isEqualTo(400);
     var input = task("Plan the launch");
     input.setNotes("Private notes <script>alert(1)</script>");
     input.setPriority("HIGH");
@@ -359,6 +364,7 @@ class AuthIntegrationTest {
 
   @Test
   void recurringTaskCreatesExactlyOneNextOccurrenceEvenAfterReopening() throws Exception {
+    timeZone = "Pacific/Kiritimati";
     var client = account();
     var input = task("Weekly review");
     input.setRecurrence("WEEKLY");
@@ -378,7 +384,8 @@ class AuthIntegrationTest {
             com.example.todobackend.todo.Todo[].class);
     assertThat(all).hasSize(2);
     var next = java.util.Arrays.stream(all).filter(t -> !t.isDone()).findFirst().orElseThrow();
-    assertThat(next.getTargetDate()).isEqualTo(java.time.LocalDate.now().plusWeeks(1));
+    assertThat(next.getTargetDate())
+        .isEqualTo(java.time.LocalDate.now(java.time.ZoneId.of(timeZone)).plusWeeks(1));
     assertThat(next.getSubtasks().get(0).done()).isFalse();
     completed.setDone(false);
     var reopened =

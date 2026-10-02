@@ -17,11 +17,17 @@ public class TodoJpaService implements TodoService {
   private final TodoRepository todos;
   private final AppUserRepository users;
   private final ObjectMapper json;
+  private final com.example.todobackend.project.ProjectRepository projects;
 
-  public TodoJpaService(TodoRepository todos, AppUserRepository users, ObjectMapper json) {
+  public TodoJpaService(
+      TodoRepository todos,
+      AppUserRepository users,
+      ObjectMapper json,
+      com.example.todobackend.project.ProjectRepository projects) {
     this.todos = todos;
     this.users = users;
     this.json = json;
+    this.projects = projects;
   }
 
   @Transactional(readOnly = true)
@@ -47,6 +53,7 @@ public class TodoJpaService implements TodoService {
 
   public Todo create(String username, Todo input) {
     validate(input);
+    validateProject(username, input);
     TodoEntity e =
         new TodoEntity(
             requireUser(username),
@@ -59,6 +66,7 @@ public class TodoJpaService implements TodoService {
 
   public Todo update(String username, long id, Todo input) {
     validate(input);
+    validateProject(username, input);
     TodoEntity e = owned(username, id);
     if (e.getDeletedAt() != null) throw new TodoNotFoundException(username, id);
     if (input.getVersion() != null && !input.getVersion().equals(e.getVersion()))
@@ -69,8 +77,9 @@ public class TodoJpaService implements TodoService {
     if (newlyCompleted && !"NONE".equals(e.getRecurrence()) && !e.isRecurrenceGenerated()) {
       e.markRecurrenceGenerated();
       Todo next = model(e, username);
-      LocalDate base = e.getTargetDate() == null ? LocalDate.now() : e.getTargetDate();
-      if (base.isBefore(LocalDate.now())) base = LocalDate.now();
+      LocalDate today = currentDate();
+      LocalDate base = e.getTargetDate() == null ? today : e.getTargetDate();
+      if (base.isBefore(today)) base = today;
       next.setTargetDate(
           switch (e.getRecurrence()) {
             case "DAILY" -> base.plusDays(1);
@@ -128,6 +137,31 @@ public class TodoJpaService implements TodoService {
     }
     todos.flush();
     return list(username, false);
+  }
+
+  private void validateProject(String username, Todo input) {
+    String project = input.getProject();
+    if (project != null
+        && !project.isBlank()
+        && !projects.existsByNameAndUserUsername(project.trim(), username))
+      throw new InvalidTodoException("Choose an existing project or move this task to Inbox");
+  }
+
+  private LocalDate currentDate() {
+    var attributes =
+        org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+    if (attributes
+        instanceof org.springframework.web.context.request.ServletRequestAttributes servlet) {
+      String zone = servlet.getRequest().getHeader("X-Time-Zone");
+      if (zone != null && !zone.isBlank()) {
+        try {
+          return LocalDate.now(ZoneId.of(zone));
+        } catch (DateTimeException ex) {
+          throw new InvalidTodoException("Invalid X-Time-Zone header");
+        }
+      }
+    }
+    return LocalDate.now();
   }
 
   private AppUser requireUser(String username) {
