@@ -1,60 +1,30 @@
-### lesson6 manual endpoint tests (IntelliJ HTTP Client / VS Code REST Client — just hit Run)
+### Daylight API — no credentials are hardcoded in this file.
 @host = http://localhost:8080
-@user = Anyname
+@csrf = paste-the-token-returned-by-the-request-below
 
-### Connectivity check
-GET {{host}}/hello-world-bean
+### Readiness, without database details
+GET {{host}}/health
 
-### Path variable
-GET {{host}}/hello-world/path-variable/Zhongyan
+### Obtain CSRF token; retain the JSESSIONID cookie between requests.
+GET {{host}}/auth/csrf
 
-### List
-GET {{host}}/users/{{user}}/todos
+### Current account (401 until signed in)
+GET {{host}}/auth/me
 
-### Single item
-GET {{host}}/users/{{user}}/todos/1
+### Current account's tasks
+GET {{host}}/api/tasks
 
-### Single item — nonexistent id, should be 404 and not 500
-GET {{host}}/users/{{user}}/todos/99999
+### Trash
+GET {{host}}/api/tasks?trash=true
 
-### Someone else's todo — should be 404; you must not see other people's data
-GET {{host}}/users/SomeoneElse/todos/1
+### Projects
+GET {{host}}/api/projects
 
-### Create — should be 201, with a Location header and the backend-assigned id in the body
-POST {{host}}/users/{{user}}/todos
-Content-Type: application/json
+### Export current account's tasks and projects, never credentials
+GET {{host}}/api/backup
 
-{
-  "id": -1,
-  "description": "Learn REST properly",
-  "targetDate": "2026-12-31",
-  "done": false
-}
+### Sign out (replace @csrf with a fresh token)
+POST {{host}}/auth/logout
+X-CSRF-TOKEN: {{csrf}}
 
-### Create — description too short, should be 400 with a message in the body
-POST {{host}}/users/{{user}}/todos
-Content-Type: application/json
-
-{
-  "id": -1,
-  "description": "abc",
-  "targetDate": "2026-12-31",
-  "done": false
-}
-
-### Update — note that the id in the body is ignored; the path wins
-PUT {{host}}/users/{{user}}/todos/1
-Content-Type: application/json
-
-{
-  "id": 99,
-  "description": "Learn Angular Components - updated",
-  "targetDate": "2027-01-15",
-  "done": true
-}
-
-### Delete — should be 204 with no response body
-DELETE {{host}}/users/{{user}}/todos/1
-
-### Delete again — should be 404
-DELETE {{host}}/users/{{user}}/todos/1
+### See /swagger-ui.html or the root README for write schemas.

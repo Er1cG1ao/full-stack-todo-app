@@ -1,7 +1,87 @@
-/* Global styles. Bootstrap is loaded locally from angular.json. */
-
+:root {
+  color-scheme: light;
+  --canvas: #faf9f6;
+  --surface: #fff;
+  --sidebar: #f3f2ed;
+  --ink: #29372e;
+  --secondary: #566157;
+  --muted: #687163;
+  --line: #eaece5;
+  --hover: #eeeee7;
+  --accent: #b75e43;
+  --accent-soft: #f8eee8;
+  --sage: #5e7454;
+  --sage-soft: #edf1e8;
+  --lavender: #74658b;
+  --lavender-soft: #f1eef7;
+  --amber: #8e7130;
+  --amber-soft: #f8f3e5;
+  --checkbox: #ced3c8;
+  --danger: #b34e3e;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--ink);
+  background: var(--canvas);
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --canvas: #191e1b;
+  --surface: #222923;
+  --sidebar: #1e251f;
+  --ink: #e6ecdf;
+  --secondary: #bec9b8;
+  --muted: #9caa98;
+  --line: #343e34;
+  --hover: #303a30;
+  --accent: #df936f;
+  --accent-soft: #3c2e27;
+  --sage: #a5be91;
+  --sage-soft: #2d392a;
+  --lavender: #b3a2ca;
+  --lavender-soft: #332c3e;
+  --amber: #d2b977;
+  --amber-soft: #3b3527;
+  --checkbox: #62725b;
+  --danger: #eea38e;
+}
+* {
+  box-sizing: border-box;
+}
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: #f5f5f5;
   margin: 0;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  border: 0;
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: 3px;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+}
+a {
+  color: var(--accent);
+}
+::selection {
+  background: var(--sage-soft);
+  color: var(--ink);
 }

@@ -1,3 +1,336 @@
-.card {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+:host {
+  display: block;
+}
+.forgot-button {
+  display: block;
+  margin: 16px auto 0;
+  color: var(--accent);
+  font-size: 11px;
+}
+.recovery-note {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--secondary);
+}
+.recovery-code {
+  display: block;
+  background: var(--sage-soft);
+  border: 1px solid var(--line);
+  padding: 17px;
+  border-radius: 7px;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.8;
+  user-select: all;
+}
+.auth-form .recovery-ack {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  line-height: 1.7;
+  font-size: 11px;
+}
+.auth-form .recovery-ack input {
+  width: 14px;
+  margin: 3px 0;
+  accent-color: var(--sage);
+}
+.auth-page {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.auth-story {
+  background: #344c3b;
+  color: #f2f1e6;
+  display: flex;
+  flex-direction: column;
+  padding: 45px 55px;
+  position: relative;
+  overflow: hidden;
+}
+.auth-story:after {
+  content: '';
+  position: absolute;
+  width: 540px;
+  height: 540px;
+  border: 1px solid #ffffff0b;
+  border-radius: 50%;
+  right: -280px;
+  top: -220px;
+  pointer-events: none;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f2f1e6;
+  text-decoration: none;
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -1px;
+}
+.brand app-icon {
+  width: 28px;
+  height: 28px;
+  color: #d5b38b;
+}
+.story-content {
+  max-width: 440px;
+  width: 100%;
+  margin: auto;
+  padding: 70px 0;
+}
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 550;
+  color: var(--sage);
+  margin: 0 0 17px;
+}
+.auth-story .eyebrow {
+  color: #b7c6a8;
+}
+h1 {
+  font-family: Georgia, serif;
+  font-size: 57px;
+  line-height: 1.12;
+  font-weight: 400;
+  letter-spacing: -1.6px;
+  margin: 0 0 24px;
+}
+.story-content > p:not(.eyebrow) {
+  color: #c0ceba;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.preview-card {
+  margin-top: 40px;
+  border: 1px solid #ffffff18;
+  border-radius: 12px;
+  padding: 22px;
+  background: #ffffff08;
+  transform: rotate(-2deg);
+  box-shadow: 0 20px 50px #182a2420;
+  font-size: 11px;
+}
+.preview-heading {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-family: Georgia, serif;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ffffff16;
+  margin-bottom: 18px;
+}
+.preview-heading app-icon {
+  color: #d5b38b;
+  width: 17px;
+  height: 17px;
+}
+.preview-card > div:not(.preview-heading) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 19px 0;
+}
+.sample-check {
+  width: 15px;
+  height: 15px;
+  border: 1px solid #849b7f;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+.sample-check.completed {
+  background: #9bb38e;
+  color: #344c3b;
+}
+.sample-check app-icon {
+  width: 10px;
+  height: 10px;
+}
+.sample-completed {
+  text-decoration: line-through;
+  color: #a6b59f;
+}
+.sample-tag {
+  font-size: 8px;
+  color: #b5c5a9;
+  background: #ffffff0b;
+  padding: 4px 6px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+.preview-card footer {
+  font-size: 9px;
+  color: #adbca4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #ffffff16;
+  padding-top: 17px;
+}
+.sample-progress {
+  width: 37px;
+  height: 4px;
+  border-radius: 5px;
+  background: #9bb38e;
+}
+.story-footer {
+  font-size: 10px;
+  color: #a5b99f;
+  margin: 0;
+}
+.auth-form-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 45px 35px;
+  background: var(--canvas);
+}
+.auth-form {
+  width: 100%;
+  max-width: 350px;
+  margin: auto;
+}
+.auth-form h2 {
+  font-family: Georgia, serif;
+  font-size: 38px;
+  font-weight: 400;
+  letter-spacing: -1px;
+  margin: 0 0 13px;
+}
+.intro {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 31px;
+  line-height: 1.7;
+}
+.auth-form label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--secondary);
+  margin-top: 20px;
+}
+.auth-form input {
+  width: 100%;
+  margin-top: 9px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 14px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+}
+.submit {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 7px;
+  padding: 14px 17px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 26px;
+}
+.submit app-icon {
+  width: 17px;
+  height: 17px;
+}
+.switch-mode {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  margin: 25px 0;
+}
+.switch-mode button {
+  color: var(--accent);
+  font-weight: 600;
+  margin-left: 5px;
+}
+.privacy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 34px;
+}
+.privacy app-icon {
+  width: 12px;
+  height: 12px;
+}
+.auth-footer {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 40px;
+}
+.error,
+.success {
+  font-size: 12px;
+  line-height: 1.6;
+  background: var(--accent-soft);
+  color: var(--danger);
+  padding: 12px;
+  border-radius: 7px;
+}
+.success {
+  background: var(--sage-soft);
+  color: var(--sage);
+}
+.hint {
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 1.6;
+  display: block;
+  margin-top: 8px;
+}
+.mobile-brand {
+  display: none;
+}
+@media (max-width: 1000px) {
+  .auth-story {
+    padding: 35px;
+  }
+  h1 {
+    font-size: 45px;
+  }
+  .preview-card {
+    padding: 17px;
+  }
+}
+@media (max-width: 700px) {
+  .auth-page {
+    display: block;
+  }
+  .auth-story {
+    display: none;
+  }
+  .auth-form-section {
+    min-height: 100dvh;
+    padding: 35px 28px;
+  }
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 26px;
+    font-weight: 650;
+    margin-bottom: 48px;
+  }
+  .mobile-brand app-icon {
+    color: var(--accent);
+    width: 26px;
+    height: 26px;
+  }
+  .auth-form h2 {
+    font-size: 35px;
+  }
 }

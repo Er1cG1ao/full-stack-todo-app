@@ -2,7 +2,7 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
-import { basicAuthInterceptor } from './service/http/basic-auth-interceptor';
+import { sessionInterceptor } from './service/http/session-interceptor';
 
 /**
  * class2 的 app.module.ts 做的三件事，在 standalone 时代都搬到了这里：
@@ -16,8 +16,8 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(
-      withFetch(),                              // 底层用 fetch 而不是 XHR，SSR 友好
-      withInterceptors([basicAuthInterceptor]), // 所有请求自动带上 Authorization
+      withFetch(), // 底层用 fetch 而不是 XHR，SSR 友好
+      withInterceptors([sessionInterceptor]),
     ),
   ],
 };

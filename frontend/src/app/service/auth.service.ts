@@ -1,51 +1,57 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, switchMap, tap } from 'rxjs';
+import { API_URL } from '../app.constants';
 
-const SESSION_KEY = 'authenticatedUser';
-const TOKEN_KEY = 'basicAuthToken';
+export interface AuthUser {
+  username: string;
+  recoveryCode?: string;
+}
 
-/**
- * 登录状态 + Basic 认证凭据的唯一来源。
- *
- * 和 class2 的 HardcodedAuthenticationService 一样是"假登录"（用户名密码写死），
- * 但多做了一件事：登录成功时把 Basic token 存下来，供 HTTP 拦截器取用。
- * class2 是在拦截器里把用户名密码又写死了一遍 —— 两处硬编码，容易改漏。
- */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  // 后端 application.properties 里配置的账号，必须与之一致
-  private readonly validUsername = 'alice';
-  private readonly validPassword = 'dummy';
+  private http = inject(HttpClient);
+  private currentUser = signal<string | null>(null);
 
-  authenticate(username: string, password: string): boolean {
-    if (username === this.validUsername && password === this.validPassword) {
-      // 'Basic ' + base64(username:password) —— 这就是 HTTP Basic 认证头的全部内容
-      const token = 'Basic ' + window.btoa(`${username}:${password}`);
-      sessionStorage.setItem(SESSION_KEY, username);
-      sessionStorage.setItem(TOKEN_KEY, token);
-      return true;
-    }
-    return false;
+  constructor() {
+    sessionStorage.removeItem('authenticatedUser');
+    sessionStorage.removeItem('basicAuthToken');
   }
 
   get username(): string | null {
-    return this.isBrowser ? sessionStorage.getItem(SESSION_KEY) : null;
+    return this.currentUser();
   }
-
-  get basicAuthToken(): string | null {
-    return this.isBrowser ? sessionStorage.getItem(TOKEN_KEY) : null;
-  }
-
   isUserLoggedIn(): boolean {
     return this.username !== null;
   }
 
-  logout(): void {
-    sessionStorage.removeItem(SESSION_KEY);
-    sessionStorage.removeItem(TOKEN_KEY);
+  authenticate(username: string, password: string): Observable<AuthUser> {
+    const body = new HttpParams().set('username', username).set('password', password);
+    return this.http
+      .post<void>(`${API_URL}/auth/login`, body)
+      .pipe(switchMap(() => this.restoreSession()));
   }
 
-  // sessionStorage 只存在于浏览器；SSR/预渲染时 window 是 undefined
-  private get isBrowser(): boolean {
-    return typeof window !== 'undefined';
+  register(username: string, password: string): Observable<AuthUser> {
+    return this.http.post<AuthUser>(`${API_URL}/auth/register`, { username, password });
+  }
+  recover(username: string, recoveryCode: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(`${API_URL}/auth/recover`, { username, recoveryCode, newPassword });
+  }
+
+  restoreSession(): Observable<AuthUser> {
+    return this.http
+      .get<AuthUser>(`${API_URL}/auth/me`)
+      .pipe(tap((user) => this.currentUser.set(user.username)));
+  }
+
+  clearSession(): void {
+    this.currentUser.set(null);
+    sessionStorage.removeItem('authenticatedUser');
+    sessionStorage.removeItem('basicAuthToken');
+  }
+
+  logout(): Observable<void> {
+    return this.http.post<void>(`${API_URL}/auth/logout`, {}).pipe(tap(() => this.clearSession()));
   }
 }

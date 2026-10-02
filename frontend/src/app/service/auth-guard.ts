@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './auth.service';
+import { catchError, map, of } from 'rxjs';
 
 /**
  * 函数式路由守卫（v15+ 推荐写法，替代 class2 里 implements CanActivate 的 RouteGuardService）。
@@ -12,10 +13,11 @@ export const authGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  if (auth.isUserLoggedIn()) {
-    return true;
-  }
-
-  router.navigate(['/login']);
-  return false;
+  return auth.restoreSession().pipe(
+    map(() => true),
+    catchError(() => {
+      auth.clearSession();
+      return of(router.createUrlTree(['/login']));
+    }),
+  );
 };

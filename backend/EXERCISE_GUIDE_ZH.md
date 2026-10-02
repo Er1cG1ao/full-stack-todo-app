@@ -1,5 +1,8 @@
 # Todo Backend Workshop 练习整理
 
+> 历史课程笔记：下面描述的是原始练习，不是 Daylight 当前接口约定。
+> 当前功能、鉴权、校验和软删除行为请参考根目录 README 与 OpenAPI 文档。
+
 这个 workshop 用 9 个步骤、19 个练习点，把一个 Spring Boot 后端从“能启动”补全为可供 Angular 前端调用的 Todo CRUD API。代码已全部完成，下面保留每个练习的目标和必须理解的原因。
 
 | 步骤 | 练习 | 位置 | 核心知识 |
