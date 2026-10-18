@@ -47,8 +47,7 @@ trusted proxy and edge limits; multiple replicas need shared rate/session stores
 
 This project does not encrypt the H2 file, enforce MFA, provide email verification,
 run a distributed abuse service, or claim penetration-testing/compliance certification.
-Browser-level visual/end-to-end testing and container runtime checks remain separate
-release gates when those environments are available.
+Validate browser behavior, container routing and HTTPS cookies when changing deployment settings.
 
 ## Reporting
 

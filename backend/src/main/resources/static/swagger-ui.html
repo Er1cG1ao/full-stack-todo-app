@@ -11,20 +11,6 @@
 <body>
   <div id="swagger-ui"></div>
   <script src="./swagger-ui/swagger-ui-bundle.js" crossorigin></script>
-  <script>
-    window.ui = SwaggerUIBundle({
-      url: './openapi.yaml',
-      dom_id: '#swagger-ui',
-      presets: [SwaggerUIBundle.presets.apis],
-      layout: 'BaseLayout',
-      deepLinking: true,
-
-      docExpansion: 'list',
-      defaultModelsExpandDepth: 1,
-      tryItOutEnabled: true,
-      persistAuthorization: false,
-      displayRequestDuration: true
-    });
-  </script>
+  <script src="./swagger-ui/swagger-initializer.js"></script>
 </body>
 </html>

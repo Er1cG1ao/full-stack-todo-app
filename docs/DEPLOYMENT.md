@@ -12,7 +12,7 @@ not terminate other processes or change firewall/browser settings.
 
 ## Optional Docker Compose
 
-Docker/Compose is optional; do not buy a hosted service to run this project.
+Docker Compose is an optional way to run both services locally.
 The supplied configuration binds the frontend to loopback and keeps the backend
 private inside the Compose network.
 
@@ -21,24 +21,23 @@ private inside the Compose network.
     docker compose up --build -d
     docker compose logs -f
 
-Open http://localhost:8088. Check readiness at /health. The backend runs as an
+Open http://localhost:8088; Swagger UI is at `/swagger-ui.html` on the same origin.
+Check readiness at `/health`. The backend runs as an
 unprivileged user, has a memory limit and keeps H2 data in the todo-data named volume.
 The frontend container health check tests the backend/database through nginx.
 
     docker compose down
 
 Stopping containers keeps the volume. Do not add a volume-deletion flag unless you
-intend to erase every account and task. This configuration does not deploy anything
-to a cloud provider and does not request paid resources.
+intend to erase every account and task.
 
 Container recipes use official major-version image tags. Pin reviewed image digests
-for a reproducible public release and scan/update them regularly. The development
-machine used for this delivery did not have Docker, so the recipes have not been
-runtime-verified here. Native production builds and API tests are verified.
+for a reproducible public release and scan/update them regularly.
+Validate image builds, container health and proxy behavior in your deployment environment.
 
 ## Public HTTPS deployment checklist
 
-1. Obtain a domain/HTTPS termination only under your own explicit spending approval.
+1. Configure a domain and HTTPS termination.
 2. Keep backend 8080 inaccessible from the public network.
 3. Route frontend and API through the same origin. Preserve Host; configure the
    exact APP_ORIGIN and set SESSION_COOKIE_SECURE=true.
@@ -49,8 +48,6 @@ runtime-verified here. Native production builds and API tests are verified.
    shared sessions and shared rate limits.
 7. Validate browser behavior on desktop/mobile, test cookie/CSRF handling over HTTPS,
    and run container smoke/security tests before inviting users.
-
-No HTTPS certificate, DNS change, server purchase or hosting subscription was created.
 
 ## Backups and restore
 

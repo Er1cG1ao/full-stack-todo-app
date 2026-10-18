@@ -16,5 +16,3 @@ locally at /swagger-ui.html, with no external CDN.
 The older /users/{username}/todos API is retained for compatibility but is not used
 by the new UI. Ownership is enforced there too. Its DELETE now moves tasks to Trash.
 New integrations should use /api/tasks, including version-checked updates.
-
-EXERCISE_GUIDE_ZH.md is retained as historical learning material, not the current API contract.
